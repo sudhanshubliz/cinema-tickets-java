@@ -1,2 +1,2 @@
 # cinema-tickets-java
-cinema ticket in java
+Cinema ticket Implementation in Java
