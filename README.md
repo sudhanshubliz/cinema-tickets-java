@@ -1,2 +1,3 @@
 # cinema-tickets-java
-Cinema ticket Implementation in Java
+Cinema ticket service business logic Implementation in Java
+    
