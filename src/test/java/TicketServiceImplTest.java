@@ -24,30 +24,30 @@ public class TicketServiceImplTest {
     @Test
     void shouldRejectIfNoOTicketZero() {
         assertThrows(InvalidPurchaseException.class,
-                () -> ticketService.purchaseTickets(1L, new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 0)));
+                () -> ticketService.purchaseTickets(123L, new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 0)));
     }
 
 
     @Test
     void shouldRejectIfNoAdultWithChild() {
         assertThrows(InvalidPurchaseException.class,
-                () -> ticketService.purchaseTickets(1L, new TicketTypeRequest(TicketTypeRequest.Type.CHILD, 2)));
+                () -> ticketService.purchaseTickets(456L, new TicketTypeRequest(TicketTypeRequest.Type.CHILD, 2)));
     }
 
     @Test
     void shouldRejectIfExceeds25Tickets() {
         assertThrows(InvalidPurchaseException.class,
-                () -> ticketService.purchaseTickets(1L, new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 26)));
+                () -> ticketService.purchaseTickets(145L, new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 26)));
     }
 
     @Test
     void shouldCalculateCorrectPaymentAndSeats() {
-        ticketService.purchaseTickets(1L,
-                new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 2),
+        ticketService.purchaseTickets(1344L,
+                new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 3),
                 new TicketTypeRequest(TicketTypeRequest.Type.CHILD, 1),
                 new TicketTypeRequest(TicketTypeRequest.Type.INFANT, 1));
 
-       verify(paymentService).makePayment(1L, 2 * 25 + 1 * 15); // £65
-       verify(seatService).reserveSeat(1L, 3); // 2 adults + 1 child
+       verify(paymentService).makePayment(1344L, 3 * 25 + 15); // £90
+       verify(seatService).reserveSeat(1344L, 4); // 3 adults + 1 child
     }
 }
