@@ -7,14 +7,13 @@ import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 import java.util.List;
 
 public class TicketServiceValidation {
-
     public static void validateTotalTickets(int totalTickets) {
         if(totalTickets > TicketPrice.ADULT.getPrice()){
             throw new InvalidPurchaseException("Cannot purchase more than 25 tickets at a time.");
         }
     }
 
-    public static void validateRequests(TicketTypeRequest[] ticketTypeRequests) {
+    public static void validateRequests(TicketTypeRequest... ticketTypeRequests) {
         if (ticketTypeRequests == null || ticketTypeRequests.length == 0) {
             throw new InvalidPurchaseException("At least one ticket must be requested.");
         }

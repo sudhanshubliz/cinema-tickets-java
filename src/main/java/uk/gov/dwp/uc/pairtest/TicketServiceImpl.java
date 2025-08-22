@@ -12,7 +12,6 @@ public class TicketServiceImpl implements TicketService {
     /**
      * Should only have private methods other than the one below.
      */
-
     private final TicketPaymentService ticketPaymentService;
     private final SeatReservationService seatReservationService;
 
