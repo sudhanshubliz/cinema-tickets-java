@@ -2,13 +2,12 @@ package uk.gov.dwp.uc.pairtest;
 
 import thirdparty.paymentgateway.TicketPaymentService;
 import thirdparty.seatbooking.SeatReservationService;
+import uk.gov.dwp.uc.pairtest.domain.TicketPrice;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 
 import java.util.List;
 import java.util.Objects;
-
-import static uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest.Type.ADULT;
 
 public class TicketServiceImpl implements TicketService {
     /**
@@ -19,15 +18,13 @@ public class TicketServiceImpl implements TicketService {
     private final SeatReservationService seatReservationService;
 
     public TicketServiceImpl(TicketPaymentService ticketPaymentService, SeatReservationService seatReservationService) {
-        this.ticketPaymentService = ticketPaymentService;
-        this.seatReservationService = seatReservationService;
+        this.ticketPaymentService = Objects.requireNonNull(ticketPaymentService);
+        this.seatReservationService = Objects.requireNonNull(seatReservationService);
     }
 
     @Override
     public void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests) throws InvalidPurchaseException {
-
         validateAccount(accountId);
-
         validateRequests(ticketTypeRequests);
         int totalTickets = 0;
         int totalPayment = 0;
@@ -35,16 +32,14 @@ public class TicketServiceImpl implements TicketService {
 
         for(TicketTypeRequest request: ticketTypeRequests) {
             int noOfTickets = request.getNoOfTickets();
-
-
             totalTickets += noOfTickets;
             switch (request.getTicketType()) {
                 case ADULT -> {
-                    totalPayment += noOfTickets * 25;
+                    totalPayment += noOfTickets * TicketPrice.ADULT.getPrice();
                     seatsToReserve += noOfTickets;
                 }
                 case CHILD -> {
-                    totalPayment += noOfTickets * 15;
+                    totalPayment += noOfTickets * TicketPrice.CHILD.getPrice();
                     seatsToReserve += noOfTickets;
                 }
                 case INFANT -> {
@@ -54,13 +49,15 @@ public class TicketServiceImpl implements TicketService {
         }
         validateTotalTickets(totalTickets);
         validateAdultTicket(ticketTypeRequests);
-        ticketPaymentService.makePayment(accountId, totalPayment);
-        seatReservationService.reserveSeat(accountId, seatsToReserve);
-
+        try{
+            ticketPaymentService.makePayment(accountId, totalPayment);
+            seatReservationService.reserveSeat(accountId, seatsToReserve);
+        }catch(Exception e){
+            throw new InvalidPurchaseException("An error occurred while processing the payment or reserving seats: " + e.getMessage());
+        }
     }
 
     private static void validateAdultTicket(TicketTypeRequest... ticketTypeRequests) {
-
         // Ensure at least 1 Adult if Child/Infant present
         long adultCount = List.of(ticketTypeRequests).stream()
                 .filter(req -> req.getTicketType() == TicketTypeRequest.Type.ADULT)
@@ -72,7 +69,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private static void validateTotalTickets(int totalTickets) {
-        if(totalTickets >25){
+        if(totalTickets >TicketPrice.ADULT.getPrice()){
             throw new InvalidPurchaseException("Cannot purchase more than 25 tickets at a time.");
         }
     }

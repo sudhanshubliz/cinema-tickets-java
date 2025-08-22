@@ -22,6 +22,13 @@ public class TicketServiceImplTest {
     }
 
     @Test
+    void shouldRejectIfNoOTicketZero() {
+        assertThrows(InvalidPurchaseException.class,
+                () -> ticketService.purchaseTickets(1L, new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 0)));
+    }
+
+
+    @Test
     void shouldRejectIfNoAdultWithChild() {
         assertThrows(InvalidPurchaseException.class,
                 () -> ticketService.purchaseTickets(1L, new TicketTypeRequest(TicketTypeRequest.Type.CHILD, 2)));
